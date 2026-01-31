@@ -20,11 +20,10 @@ Runs base editor guide design for a single set of parameters. Wraps `base_editin
 {
   "type": "object",
   "properties": {
-    "input_file": { "type": "string", "description": "Path to transcript list (.txt) or FASTA file." },
-    "input_type": { "type": "string", "description": "Type of input: transcript list or nucleotide sequence." },
+    "input_text": { "type": "string", "description": "Raw FASTA/sequence text. A temp file is created automatically." },
     "output_name": { "type": "string", "description": "Output folder name prefix." },
     "variant_file": { "type": "string", "default": "variant_summary.txt", "description": "ClinVar variant file." },
-    "be_type": { "type": "string", "default": "", "description": "Base editor type; if empty, use PAM/edit window parameters." },
+    "be_type": { "type": "string", "default": "", "description": "Base editor type; if empty, use PAM/edit window parameters. Supported: BE1, BE2, BE3, HF-BE3, BE4, BE4max, BE4-Gam, YE1-BE3, EE-BE3, YE2-BE3, YEE-BE3, VQR-BE3, VRER-BE3, SaBE3, SaBE4, SaBE4-Gam, Sa(KKH)-BE3, Target-AID, Target-AID-NG, xBE3, eA3A-BE3, A3A-BE3, BE-PLUS, ABE7.9, ABE7.10, xABE, ABESa, VQR-ABE, VRER-ABE, Sa(KKH)-ABE." },
     "pam": { "type": "string", "default": "NGG", "description": "PAM sequence (used when be_type is empty)." },
     "edit_window": { "type": "string", "default": "4-8", "description": "Edit window relative to sgRNA (used when be_type is empty)." },
     "sg_len": { "type": "integer", "default": 20, "description": "sgRNA length excluding PAM (used when be_type is empty)." },
@@ -32,7 +31,7 @@ Runs base editor guide design for a single set of parameters. Wraps `base_editin
     "intron_buffer": { "type": "integer", "default": 30, "description": "Number of bp into intron for guide design." },
     "filter_gc": { "type": "boolean", "default": false, "description": "Filter edits in a GC motif." }
   },
-  "required": ["input_file", "input_type", "output_name"]
+  "required": ["input_text", "output_name"]
 }
 ```
 
@@ -89,6 +88,22 @@ Runs base editor guide design for a single set of parameters. Wraps `base_editin
 }
 ```
 
+### Example request (single run, raw sequence string)
+
+```
+{
+  "tool": "design_guides",
+  "arguments": {
+    "input_text": "ATGCGTACGTAGCTAGCTAGCTAGCTAGCTAGCTAGCTA",
+    "output_name": "RawSeq_Test",
+    "pam": "NGG",
+    "edit_window": "4-8",
+    "sg_len": 20,
+    "edit": "all"
+  }
+}
+```
+
 ## Tool: design_guides_multiple
 
 Runs base editor guide design for multiple BE types or parameter rows. Wraps `multiple_designs.py`.
@@ -99,13 +114,12 @@ Runs base editor guide design for multiple BE types or parameter rows. Wraps `mu
 {
   "type": "object",
   "properties": {
-    "input_file": { "type": "string", "description": "Path to transcript list (.txt) or FASTA file." },
-    "input_type": { "type": "string", "description": "Type of input: transcript list or nucleotide sequence." },
+    "input_text": { "type": "string", "description": "Raw FASTA/sequence text. A temp file is created automatically." },
     "be_file": { "type": "string", "description": "Base editor parameter file." },
     "be_type": { "type": "string", "description": "Base editor type to use from be_file." },
     "output_prefix": { "type": "string", "description": "Prefix for output folders." }
   },
-  "required": ["input_file", "input_type", "be_file", "be_type", "output_prefix"]
+  "required": ["input_text", "be_file", "be_type", "output_prefix"]
 }
 ```
 

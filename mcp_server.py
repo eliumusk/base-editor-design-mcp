@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import tempfile
 from typing import Dict, List, Optional
 
 from fastmcp import FastMCP
@@ -47,11 +48,37 @@ def _run_cmd(cmd: List[str]) -> Dict[str, str]:
     }
 
 
+def _normalize_input_text(input_text: str) -> str:
+    content = input_text.strip()
+    if not content:
+        return ""
+    if content.startswith(">"):
+        return content + "\n"
+    # Wrap raw sequence as FASTA with a default header.
+    seq = "".join(content.split())
+    lines = [seq[i : i + 60] for i in range(0, len(seq), 60)]
+    return ">sequence_1\n" + "\n".join(lines) + "\n"
+
+
+def _write_temp_input(content: str, suffix: str) -> str:
+    tmp_dir = os.path.join(REPO_ROOT, ".mcp_tmp")
+    os.makedirs(tmp_dir, exist_ok=True)
+    fd, path = tempfile.mkstemp(dir=tmp_dir, prefix="mcp_input_", suffix=suffix, text=True)
+    with os.fdopen(fd, "w") as handle:
+        handle.write(content)
+    return path
+
+
+def _prepare_input_file(input_text: str) -> str:
+    normalized = _normalize_input_text(input_text)
+    if not normalized:
+        raise ValueError("input_text is empty after normalization")
+    return _write_temp_input(normalized, ".fa")
+
 @mcp.tool()
 def design_guides(
-    input_file: str,
-    input_type: str,
     output_name: str,
+    input_text: str = "",
     variant_file: str = "variant_summary.txt",
     be_type: str = "",
     pam: str = "NGG",
@@ -65,13 +92,14 @@ def design_guides(
     Run base editor guide design for a single set of parameters.
     Returns output folder and command logs.
     """
+    resolved_input_file = _prepare_input_file(input_text)
     cmd = [
         sys.executable,
         "base_editing_guide_designs.py",
         "--input-file",
-        input_file,
+        resolved_input_file,
         "--input-type",
-        input_type,
+        "nuc",
         "--variant-file",
         variant_file,
         "--output-name",
@@ -111,23 +139,23 @@ def design_guides(
 
 @mcp.tool()
 def design_guides_multiple(
-    input_file: str,
-    input_type: str,
     be_file: str,
     be_type: str,
     output_prefix: str,
+    input_text: str = "",
 ) -> Dict[str, object]:
     """
     Run base editor guide design for multiple BE types or parameter rows.
     Returns the output folders created and command logs.
     """
+    resolved_input_file = _prepare_input_file(input_text)
     cmd = [
         sys.executable,
         "multiple_designs.py",
         "--input-file",
-        input_file,
+        resolved_input_file,
         "--ip-type",
-        input_type,
+        "nuc",
         "--be-file",
         be_file,
         "--be-type",

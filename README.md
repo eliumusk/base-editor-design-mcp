@@ -31,6 +31,7 @@ Tools:
   <li><b>design_guides</b>: Wraps <code>base_editing_guide_designs.py</code> with the same parameters.</li>
   <li><b>design_guides_multiple</b>: Wraps <code>multiple_designs.py</code> for batch runs.</li>
 </ul>
+<p>Tip: MCP tools accept <code>input_text</code> only (raw sequences/FASTA); a temp file is created automatically. The MCP wrapper always runs in nucleotide mode.</p>
 <br/>
 <b>MCP tool schema & examples</b><br/>
 See <code>MCP_TOOLS.md</code> for detailed schema and example requests.
